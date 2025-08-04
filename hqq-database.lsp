@@ -1,3 +1,6 @@
+(defpackage :hqq-database
+  (:export hqq-item hqq-item-note-date new-modify-time))
+
 (defclass hqq-item ()
   ((category :initarg :category
 	     :initform nil
@@ -28,3 +31,16 @@
 
 (defmethod initialize-instance :after ((item hqq-item) &key)
   (setf (item-id item) (incf (item-total item))))
+
+(defgeneric new-modify-time (item)
+  (:documentation "Generically change the modified-time of any hqq-item."))
+
+(defmethod new-modify-time ((item hqq-item))
+  (setf (modified-time item) (get-universal-time)))
+
+(defclass hqq-item-note-date (hqq-item)
+  ((note :initarg :note
+	 :initform ""
+	 :accessor note
+	 :type string
+	 :documentation "An arbitrary note attached to an item.")))
