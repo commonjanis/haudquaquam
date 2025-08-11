@@ -87,7 +87,19 @@
 	 :accessor note-of
 	 :type string
 	 :documentation "An arbitrary note attached to an item.")
-   (date-of :initform nil
+   (date-of :initarg :date-of
 	    :accessor date-of
 	    :type hqq-date-range
 	    :documentation "A relevant hqq-date-range.")))
+
+(defclass hqq-todo (hqq-item-note-date)
+  ((doneness :initarg :doneness
+	     :initform nil
+	     :accessor doneness
+	     :type boolean
+	     :documentation "Whether the item is actually done.")
+   (priority :initarg :priority
+	     :initform 1 ;; considered the highest priority
+	     :accessor priority
+	     :type (integer 1 5)
+	     :documentation "How urgent an item is, with 1 being top priority.")))
