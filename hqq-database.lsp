@@ -62,9 +62,32 @@
 (defmethod new-modify-time ((item hqq-item))
   (setf (modified-time item) (get-universal-time)))
 
+(defclass hqq-date-range ()
+  ((begin-stamp :initarg :begin-stamp
+		:initform 0
+		:accessor begin-stamp
+		:type integer
+		:documentation "The timestamp at which a date range begins.")
+   (end-stamp :initarg :end-stamp
+	      :initform 0
+	      :accessor end-stamp
+	      :type integer
+	      :documentation "Point at which a date range ends.  Can equal begin-stamp.")))
+
+(defmethod initialize-instance :after ((stamps hqq-date-range) &key)
+  (progn
+    (if (or (zerop (end-stamp stamps))
+	    (> (end-stamp stamps) (begin-stamp stamps)))
+	(setf (end-stamp stamps) (begin-stamp stamps)))
+    (values (begin-stamp stamps) (end-stamp stamps))))
+
 (defclass hqq-item-note-date (hqq-item)
   ((note :initarg :note
 	 :initform ""
-	 :accessor note
+	 :accessor note-of
 	 :type string
-	 :documentation "An arbitrary note attached to an item.")))
+	 :documentation "An arbitrary note attached to an item.")
+   (date-of :initform nil
+	    :accessor date-of
+	    :type hqq-date-range
+	    :documentation "A relevant hqq-date-range.")))
