@@ -106,3 +106,20 @@
 	     :accessor priority
 	     :type (integer 1 5)
 	     :documentation "How urgent an item is, with 1 being top priority.")))
+
+(defclass hqq-database ()
+  ((data-content :initarg :data-content
+		 :initform '()
+		 :accessor data-content
+		 :type list
+		 :documentation "The contents of a given database.")
+   (categories :initarg :categories
+	       :initform '()
+	       :accessor categories
+	       :type list
+	       :documentation "A list of symbols; a database's valid categories.")
+   (db-name :initarg :db-name
+	    :initform ""
+	    :accessor db-name
+	    :type string
+	    :documentation "A database's name.")))
