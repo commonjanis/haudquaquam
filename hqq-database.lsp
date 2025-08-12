@@ -39,14 +39,16 @@
 			:accessor imported-elsewhence
 			:documentation "Whether this item came from an outside source.")))
 
-(defmethod initialize-instance :after ((item hqq-item) &key)
+(defmethod initialize-instance :after ((item hqq-item) &key)  
   (prog1
       (if (imported-elsewhence item)
-	  (cond ((> (item-id item) (item-total item))
-		 (setf (item-total item) (item-id item)))
-		((= (item-total item) (item-id item))
-		 (setf (item-total item) (1+ (item-id item))))
-		(t (item-id item)))
+	  (with-slots ((id item-id) (total item-total))
+	      item
+	    (cond ((> id total)
+		   (setf total id))
+		  ((= id total)
+		   (setf total (1+ id)))
+		  (t id)))
 	  (setf (item-id item) (incf (item-total item))))
     (with-slots ((created created-time)
 		 (modified modified-time)
@@ -56,6 +58,7 @@
 	  (setf created loaded
 		modified loaded)))))
 
+;; use this whenever anything of significance changes about an hqq-item
 (defgeneric new-modify-time (item)
   (:documentation "Generically change the modified-time of any hqq-item."))
 
