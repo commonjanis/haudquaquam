@@ -78,11 +78,13 @@
 	      :documentation "Point at which a date range ends.  Can equal begin-stamp.")))
 
 (defmethod initialize-instance :after ((stamps hqq-date-range) &key)
-  (progn
-    (if (or (zerop (end-stamp stamps))
-	    (> (end-stamp stamps) (begin-stamp stamps)))
-	(setf (end-stamp stamps) (begin-stamp stamps)))
-    (values (begin-stamp stamps) (end-stamp stamps))))
+  (with-slots ((end end-stamp) (begin begin-stamp))
+      stamps
+    (progn
+      (if (or (zerop end)
+	      (> end begin))
+	  (setf end begin))
+      (values begin end))))
 
 (defclass hqq-item-note-date (hqq-item)
   ((note :initarg :note
