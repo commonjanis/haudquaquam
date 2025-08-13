@@ -6,17 +6,17 @@
 	     :documentation "The category wherein an item exists.")
    (loaded-time :initform (get-universal-time)
 		:reader loaded-time
-		:type integer
+		:type (integer 0 *)
 		:documentation "Time an item was loaded at - not changeable.")
    (created-time :initform 0
 		 :initarg :created-time
 		 :accessor created-time
-		 :type integer
+		 :type (integer 0 *)
 		 :documentation "An item's creation time - immutable unless imported.")
    (modified-time :initform 0
 		  :initarg :modified-time
 		  :accessor modified-time
-		  :type integer
+		  :type (integer 0 *)
 		  :documentation "An item's modification time - changeable!")
    (item-name :initarg :item-name
 	      :initform ""
@@ -69,12 +69,12 @@
   ((begin-stamp :initarg :begin-stamp
 		:initform 0
 		:accessor begin-stamp
-		:type integer
+		:type (integer 0 *)
 		:documentation "The timestamp at which a date range begins.")
    (end-stamp :initarg :end-stamp
 	      :initform 0
 	      :accessor end-stamp
-	      :type integer
+	      :type (integer 0 *)
 	      :documentation "Point at which a date range ends.  Can equal begin-stamp.")))
 
 (defmethod initialize-instance :after ((stamps hqq-date-range) &key)
@@ -111,12 +111,10 @@
 
 (defclass hqq-database ()
   ((data-content :initarg :data-content
-		 :initform '()
 		 :accessor data-content
-		 :type list
+		 :type array
 		 :documentation "The contents of a given database.")
-   (categories :initarg :categories
-	       :initform '()
+   (categories :initform '()
 	       :accessor categories
 	       :type list
 	       :documentation "A list of symbols; a database's valid categories.")
@@ -124,4 +122,9 @@
 	    :initform ""
 	    :accessor db-name
 	    :type string
-	    :documentation "A database's name.")))
+	    :documentation "A database's name.")
+   (db-type :initarg :db-type
+	    :initform 'hqq-item
+	    :accessor db-type
+	    :type symbol
+	    :documentation "The specific type of hqq-item this database uses.")))
