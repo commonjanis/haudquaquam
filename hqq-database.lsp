@@ -82,7 +82,7 @@
       stamps
     (progn
       (if (or (zerop end)
-	      (> end begin))
+	      (< end begin))
 	  (setf end begin))
       (values begin end))))
 
