@@ -65,6 +65,15 @@
 (defmethod new-modify-time ((item hqq-item))
   (setf (modified-time item) (get-universal-time)))
 
+;; TODO: serialization for the various hqq-item-derived types, but
+;; probably for hqq-item itself first and foremost.  i want to use a
+;; simple but compact method to implement this kind of thing.  this is
+;; the most likely candidate for a generic to be used here.
+(defgeneric item-text-rep (item)
+  (:documentation "Group of methods for making strings from hqq-item objects."))
+
+(defvar *item-rep-start* "$$i")
+
 (defclass hqq-date-range ()
   ((begin-stamp :initarg :begin-stamp
 		:initform 0
