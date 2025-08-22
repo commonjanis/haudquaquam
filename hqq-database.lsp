@@ -78,6 +78,12 @@
 ;; NOT intended to be used on its own in practice.  this is just a
 ;; basic template for other methods on derived classes to make strings
 ;; out of this output.
+;;
+;; note likewise the format, which is of the format [type tag
+;; position] [id] PIPE [category] PIPE [item name] PIPE [timestamps
+;; enclosed in curly brackets and separated by another pipe].  this is
+;; what all the others build on, so for efficiency's sake, i haven't
+;; added beginning and ending tags to this particular method.
 (defmethod item-text-rep ((item hqq-item))
   (with-slots ((cat category) (name item-name)
 	       (create created-time) (mod modified-time)
@@ -120,7 +126,10 @@
 
 (defgeneric stamp-to-string-list (stamp)
   (:documentation "Just turns an hqq-date-range into a list of strings."))
-  
+
+;; found via MatthewRock in a github gist comment section.  LOL.
+(defun list-to-string (lst) (format nil "~{~A~}" lst))
+
 ;; for convenience in full string representations.
 (defmethod stamp-to-string-list ((stamp hqq-date-range))
   (list "{"
@@ -145,6 +154,11 @@
 ;; item-text-rep-start (whatever its value may be), and those (each
 ;; one non-numeric character) will determine how the rest of the data
 ;; is parsed later on.
+;;
+;; also, the format is the same as for the hqq-item base, but with the
+;; addition of a representation of the date timestamps - identical to
+;; the creation-modification rep but succeeding it - followed by a
+;; note delimited +{+like this+}+ at the end.
 (defmethod item-text-rep :around ((item hqq-item-note-date))
   (with-slots ((date date-of) (note note-of))
       item
@@ -166,6 +180,22 @@
 	     :accessor priority
 	     :type (integer 1 5)
 	     :documentation "How urgent an item is, with 1 being top priority.")))
+
+;; specification is similar to hqq-item-note-date, but there's a pair
+;; of numbers separated by a pipe near the end, which are,
+;; respectively, the doneness state (0 or 1) and the priority value.
+;; otherwise, it's pretty much identical.
+(defmethod item-text-rep :around ((item hqq-todo))
+  (with-slots ((done doneness) (prior priority))
+      item
+    (let ((main-material (cddr (call-next-method))))
+      `(,*item-text-rep-start* ; the opening item
+	"NTD" ; signal for "note todo"
+	,@(reverse (cdr (reverse main-material))) ; all else but the last item
+	,(if done "1" "0")
+	"|"
+	,(write-to-string prior)
+	,*item-text-rep-end*))))
 
 (defclass hqq-database ()
   ((data-content :initarg :data-content
