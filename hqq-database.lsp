@@ -67,12 +67,35 @@
 
 ;; TODO: serialization for the various hqq-item-derived types, but
 ;; probably for hqq-item itself first and foremost.  i want to use a
-;; simple but compact method to implement this kind of thing.  this is
-;; the most likely candidate for a generic to be used here.
+;; simple but compact method to implement this kind of thing.  below
+;; is the most likely candidate for a generic to be used here.
+(defvar *item-text-rep-start* "$$i")
+(defvar *item-text-rep-end* "$$o")
+
 (defgeneric item-text-rep (item)
   (:documentation "Group of methods for making strings from hqq-item objects."))
 
-(defvar *item-rep-start* "$$i")
+;; NOT intended to be used on its own in practice.  this is just a
+;; basic template for other methods on derived classes to make strings
+;; out of this output.
+(defmethod item-text-rep ((item hqq-item))
+  (with-slots ((cat category) (name item-name)
+	       (create created-time) (mod modified-time)
+	       (id item-id))
+      item
+    (list (write-to-string id)
+	  "|"
+	  (string cat)
+	  "|"
+	  name ; can't contain the pipe character, so filter it later.
+	  "|"
+	  "{"
+	  (write-to-string create) ; order is always creation then
+				   ; modification, or more broadly
+				   ; beginning then end.
+	  "|"
+	  (write-to-string mod)
+	  "}")))
 
 (defclass hqq-date-range ()
   ((begin-stamp :initarg :begin-stamp
@@ -95,16 +118,42 @@
 	  (setf end begin))
       (values begin end))))
 
+(defgeneric stamp-to-string-list (stamp)
+  (:documentation "Just turns an hqq-date-range into a list of strings."))
+  
+;; for convenience in full string representations.
+(defmethod stamp-to-string-list ((stamp hqq-date-range))
+  (list "{"
+	(write-to-string (begin-stamp stamp))
+	"|"
+	(write-to-string (end-stamp stamp))
+	"}"))
+
 (defclass hqq-item-note-date (hqq-item)
-  ((note :initarg :note
-	 :initform ""
-	 :accessor note-of
-	 :type string
-	 :documentation "An arbitrary note attached to an item.")
+  ((note-of :initarg :note-of
+	    :initform ""
+	    :accessor note-of
+	    :type string
+	    :documentation "An arbitrary note attached to an item.")
    (date-of :initarg :date-of
 	    :accessor date-of
 	    :type hqq-date-range
 	    :documentation "A relevant hqq-date-range.")))
+
+;; returns a list of strings, to be concatenated later on.  there
+;; should also be a unique series of identifiers after
+;; item-text-rep-start (whatever its value may be), and those (each
+;; one non-numeric character) will determine how the rest of the data
+;; is parsed later on.
+(defmethod item-text-rep :around ((item hqq-item-note-date))
+  (with-slots ((date date-of) (note note-of))
+      item
+    `(,*item-text-rep-start* "N" ,@(call-next-method)
+			     ,@(stamp-to-string-list date)
+			     "+{+" ; begins a note.
+			     ,note
+			     "+}+" ; ends a note.
+			     ,*item-text-rep-end*)))
 
 (defclass hqq-todo (hqq-item-note-date)
   ((doneness :initarg :doneness
