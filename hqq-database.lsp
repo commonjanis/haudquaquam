@@ -231,9 +231,30 @@
   (with-slots ((cats categories) (content data-content)
 	       (type db-type))
       database
-    (unless (slot-boundp database 'db-content)
+    (unless (slot-boundp database 'data-content)
       (setf content (make-array 0 :adjustable t :element-type type)))
     (unless (and cats (> (length content) 0))
       (setf cats
 	    (remove-duplicates (loop for thing across content
 				     collecting (category thing)))))))
+
+(defgeneric add-category (database cat)
+  (:documentation "Add a new category to a database if not already there."))
+
+(defmethod add-category ((database hqq-database) (cat symbol))
+  (with-slots ((prev-categories categories))
+      database
+    (if (not (member cat prev-categories))
+	(push cat prev-categories)
+	prev-categories)))
+
+;; similar version, but with a list of multiple categories.
+(defmethod add-category ((database hqq-database) (cat list))
+  (with-slots ((prev-categories categories))
+      database
+    (when cat
+      (loop for each-cat in cat
+	    if (and (symbolp each-cat) each-cat
+		    (not (member cat prev-categories)))
+	      do (push each-cat prev-categories)))
+    prev-categories))
