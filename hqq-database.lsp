@@ -149,11 +149,11 @@
 	    :type hqq-date-range
 	    :documentation "A relevant hqq-date-range.")))
 
-;; returns a list of strings, to be concatenated later on.  there
-;; should also be a unique series of identifiers after
-;; item-text-rep-start (whatever its value may be), and those (each
-;; one non-numeric character) will determine how the rest of the data
-;; is parsed later on.
+;; returns a list of strings, to be concatenated later on - see the
+;; above function list-to-string.  there should also be a unique
+;; series of identifiers after item-text-rep-start (whatever its value
+;; may be), and those (each one non-numeric character) will determine
+;; how the rest of the data is parsed later on.
 ;;
 ;; also, the format is the same as for the hqq-item base, but with the
 ;; addition of a representation of the date timestamps - identical to
@@ -197,6 +197,11 @@
 	,(write-to-string prior)
 	,*item-text-rep-end*))))
 
+;; the type specifier solution with db-type is pretty awesome, but
+;; there should be some means by which one could check whether the
+;; type specifier provided is actually among hqq-item or its various
+;; defined subclasses (at runtime), so i'm looking into the metaobject
+;; protocols of common lisp towards that end.
 (defclass hqq-database ()
   ((data-content :initarg :data-content
 		 :accessor data-content
@@ -216,3 +221,19 @@
 	    :accessor db-type
 	    :type symbol
 	    :documentation "The specific type of hqq-item this database uses.")))
+
+;; begins by ensuring the database's contents have the right kind of
+;; array, then, if there are no categories defined and the database
+;; has at least one item, tries to make a list of categories from the
+;; contents of the database.  i still need to test this, but i'll go
+;; ahead and commit it for posterity.
+(defmethod initialize-instance :after ((database hqq-database) &key)
+  (with-slots ((cats categories) (content data-content)
+	       (type db-type))
+      database
+    (unless (slot-boundp database 'db-content)
+      (setf content (make-array 0 :adjustable t :element-type type)))
+    (unless (and cats (> (length content) 0))
+      (setf cats
+	    (remove-duplicates (loop for thing across content
+				     collecting (category thing)))))))
