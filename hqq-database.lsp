@@ -294,3 +294,6 @@
 	    for index from 0
 	    unless (category item)
 	      collect index))))
+
+;; TODO: implement a version of filter-db-category for a list type
+;; specifier on cat.
