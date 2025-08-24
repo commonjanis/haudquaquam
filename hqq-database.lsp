@@ -258,3 +258,39 @@
 		    (not (member cat prev-categories)))
 	      do (push each-cat prev-categories)))
     prev-categories))
+
+(defgeneric filter-db-category (database cat)
+  (:documentation "Return a list of indices of items with cat, or t for everything."))
+
+;; method specifically for when cat is NOT t or nil.
+(defmethod filter-db-category ((database hqq-database) (cat symbol))
+  (with-slots ((cats categories) (content data-content))
+      database ;; below is a membership check.
+    (when (and (member cat cats) (> (length content) 0) cats)
+      (loop for item across content
+	    for index from 0
+	    if (eql (category item) cat)
+	      collect index))))
+
+;; specializing methods for handling cat being t and nil.  in
+;; particular, this one returns every index in the database,
+;; completely irrespective of its tag.  thus, it is optimized towards
+;; this end and just returns every single index, irrespective of
+;; tagging.  i'm sure there's a more efficient way to do the loop
+;; macro portion, but who cares for now.
+(defmethod filter-db-category ((database hqq-database) (cat (eql t)))
+  (with-slots ((content data-content))
+      database
+    (when (> (length content) 0)
+      (loop for index from 0 below (length content) collect index))))
+
+;; the specializer for nil returns indices for any items which do
+;; *not* have a category assigned to them.
+(defmethod filter-db-category ((database hqq-database) (cat (eql nil)))
+  (with-slots ((content data-content))
+      database
+    (when (> (length content) 0)
+      (loop for item across content
+	    for index from 0
+	    unless (category item)
+	      collect index))))
