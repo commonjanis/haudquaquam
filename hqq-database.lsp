@@ -107,9 +107,7 @@
 				   ; beginning then end.
 	  "|"
 	  (write-to-string mod)
-	  "}")))
-
-;; TODO: generic readers to interpret string representations of items.
+	  "}")))	 
 
 (defclass hqq-date-range ()
   ((begin-stamp :initarg :begin-stamp
@@ -204,6 +202,30 @@
 	"|"
 	,(write-to-string prior)
 	,*item-text-rep-end*))))
+
+;; there should also be an item validation group of methods at some
+;; point, as well as a type detector, but i can wait to implement
+;; that, i suppose.
+(defgeneric read-an-item (rep kind)
+  (:documentation "Read in some kind of item from rep - kind selects type."))
+
+(defun nth-search-helper (substring string n start)
+  (when (and start (not (string= string "")))
+    (if (= n 1)
+	(+ start (search substring string))
+	(nth-search-helper substring
+			   (subseq string (+ (length substring)
+					     (search substring string)))
+			   (1- n)
+			   (+ start (search substring string) (length substring))))))
+
+(defun nth-search (substring string n)
+  (nth-search-helper substring string n 0))
+
+; (defmethod read-an-item ((rep string) (kind (eql 'hqq-item-note-date)))
+;  (let* ((stripped-rep (string-left-trim " $iN" (string-right-trim " $o" rep)))
+;	 (id (parse-integer stripped-rep :junk-allowed t))
+;	 (category (read-from-string
 
 ;; the type specifier solution with db-type is pretty awesome, but
 ;; there should be some means by which one could check whether the
