@@ -1,3 +1,8 @@
+(in-package :cl-user)
+(defpackage hqq-database
+  (:use :cl))
+(in-package :hqq-database)
+
 (defclass hqq-item ()
   ((category :initarg :category
 	     :initform nil
