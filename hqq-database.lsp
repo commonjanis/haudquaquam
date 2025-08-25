@@ -207,7 +207,8 @@
 		 :accessor data-content
 		 :type array
 		 :documentation "The contents of a given database.")
-   (categories :initform '()
+   (categories :initarg :categories
+	       :initform '()
 	       :accessor categories
 	       :type list
 	       :documentation "A list of symbols; a database's valid categories.")
@@ -232,8 +233,9 @@
 	       (type db-type))
       database
     (unless (slot-boundp database 'data-content)
-      (setf content (make-array 0 :adjustable t :element-type type)))
-    (unless (and cats (> (length content) 0))
+      (setf content (make-array 0 :adjustable t :element-type type
+				:fill-pointer 0)))
+    (unless (or cats (> (length content) 0))
       (setf cats
 	    (remove-duplicates (loop for thing across content
 				     collecting (category thing)))))))
@@ -255,6 +257,7 @@
     (when cat
       (loop for each-cat in cat
 	    if (and (symbolp each-cat) each-cat
+		    (not (eql each-cat t)) ; because t is a symbol!
 		    (not (member cat prev-categories)))
 	      do (push each-cat prev-categories)))
     prev-categories))
@@ -262,15 +265,22 @@
 (defgeneric filter-db-category (database cat)
   (:documentation "Return a list of indices of items with cat, or t for everything."))
 
+;; this macro takes first an item which is to be looped across, then a
+;; placeholder var place-var, and finally a test to be used with the
+;; if, which must act on place-var.  this was done so that the loops
+;; wouldn't have to be written out the same damn way every time.
+(defmacro filter-db-loop-helper (content-var place-var test)
+  `(loop for ,place-var across ,content-var
+	 for index from 0
+	 if ,test ; must act on place-var.  maybe needs improvement.
+	 collect index))
+
 ;; method specifically for when cat is NOT t or nil.
 (defmethod filter-db-category ((database hqq-database) (cat symbol))
   (with-slots ((cats categories) (content data-content))
       database ;; below is a membership check.
     (when (and (member cat cats) (> (length content) 0) cats)
-      (loop for item across content
-	    for index from 0
-	    if (eql (category item) cat)
-	      collect index))))
+      (filter-db-loop-helper content item (eql (category item) cat)))))
 
 ;; specializing methods for handling cat being t and nil.  in
 ;; particular, this one returns every index in the database,
@@ -290,12 +300,20 @@
   (with-slots ((content data-content))
       database
     (when (> (length content) 0)
-      (loop for item across content
-	    for index from 0
-	    unless (category item)
-	      collect index))))
+      (filter-db-loop-helper content item (not (category item))))))
 
 ;; TODO: implement a version of filter-db-category for a list type
 ;; specifier on cat.  in terms of implementation, this method should
 ;; begin by ensuring that everything in the argument "cat" is a
 ;; non-nil, non-t symbol.
+(defmethod filter-db-category ((database hqq-database) (cat list))
+  (with-slots ((cats categories) (content data-content))
+      database
+    (let ((the-new-cats (remove-if-not (lambda (x)
+					 (or (symbolp x) (eql x t)))
+				       cat)))
+      (when (and the-new-cats
+		 (> (length content) 0)
+		 (subsetp the-new-cats cats))
+	(filter-db-loop-helper content item
+			       (member (category item) the-new-cats))))))
