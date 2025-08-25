@@ -296,4 +296,6 @@
 	      collect index))))
 
 ;; TODO: implement a version of filter-db-category for a list type
-;; specifier on cat.
+;; specifier on cat.  in terms of implementation, this method should
+;; begin by ensuring that everything in the argument "cat" is a
+;; non-nil, non-t symbol.
