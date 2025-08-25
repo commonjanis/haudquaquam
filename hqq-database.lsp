@@ -69,6 +69,12 @@
 ;; probably for hqq-item itself first and foremost.  i want to use a
 ;; simple but compact method to implement this kind of thing.  below
 ;; is the most likely candidate for a generic to be used here.
+;;
+;; furthermore, people will get to roll their own specifications for
+;; items if they so desire, so i may try to make macros or metaobject
+;; specifications which deal with serializing as desired, but for now,
+;; they can just code their own damn serialization on top of what
+;; already exists.
 (defvar *item-text-rep-start* "$$i")
 (defvar *item-text-rep-end* "$$o")
 
@@ -102,6 +108,8 @@
 	  "|"
 	  (write-to-string mod)
 	  "}")))
+
+;; TODO: generic readers to interpret string representations of items.
 
 (defclass hqq-date-range ()
   ((begin-stamp :initarg :begin-stamp
@@ -302,18 +310,25 @@
     (when (> (length content) 0)
       (filter-db-loop-helper content item (not (category item))))))
 
-;; TODO: implement a version of filter-db-category for a list type
-;; specifier on cat.  in terms of implementation, this method should
-;; begin by ensuring that everything in the argument "cat" is a
-;; non-nil, non-t symbol.
+;; in terms of implementation, this method should begin by ensuring
+;; that everything in the argument "cat" is a non-nil, non-t symbol.
+;; it then makes sure everything is actually in the tag list before it
+;; runs the checking.  finally, we go through the list and return
+;; indices for categories which are members of the cat list.
 (defmethod filter-db-category ((database hqq-database) (cat list))
   (with-slots ((cats categories) (content data-content))
       database
-    (let ((the-new-cats (remove-if-not (lambda (x)
-					 (or (symbolp x) (eql x t)))
-				       cat)))
+    (let ((the-new-cats (remove-if (lambda (x)
+				     (or (not (symbolp x))
+					 (eql x t)
+					 (not x)))
+				   cat)))
       (when (and the-new-cats
 		 (> (length content) 0)
 		 (subsetp the-new-cats cats))
 	(filter-db-loop-helper content item
 			       (member (category item) the-new-cats))))))
+
+;; TODO: string representation for databases and their contents in one
+;; go.  this should have a similar overall structure but also
+;; encapsulate the data associated with each item.
