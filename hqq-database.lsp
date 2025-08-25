@@ -222,10 +222,50 @@
 (defun nth-search (substring string n)
   (nth-search-helper substring string n 0))
 
-; (defmethod read-an-item ((rep string) (kind (eql 'hqq-item-note-date)))
-;  (let* ((stripped-rep (string-left-trim " $iN" (string-right-trim " $o" rep)))
-;	 (id (parse-integer stripped-rep :junk-allowed t))
-;	 (category (read-from-string
+(defmethod read-an-item ((rep string) (kind (eql 'hqq-item-note-date)))
+  (let* ((stripped-rep (string-left-trim " $iN" (string-right-trim " $o" rep)))
+	 (id (parse-integer stripped-rep :junk-allowed t))
+	 (category (read-from-string (subseq stripped-rep
+					     (1+ (nth-search "|" stripped-rep 1))
+					     (nth-search "|" stripped-rep 2))))
+	 (name (subseq stripped-rep
+		       (1+ (nth-search "|" stripped-rep 2))
+		       (nth-search "|" stripped-rep 3)))
+	 (created-modified
+	   (subseq stripped-rep (+ 2 (search "|{" stripped-rep))
+		   (search "}" stripped-rep)))
+	 (created (parse-integer created-modified :junk-allowed t))
+	 (modified (parse-integer (subseq created-modified
+					  (1+ (search "|" created-modified)))
+				  :junk-allowed t))
+	 (relevant-dates
+	   (make-instance 'hqq-date-range
+			  :begin-stamp (parse-integer (subseq stripped-rep
+							      (1+ (nth-search
+								   "{"
+								   stripped-rep
+								   2))
+							      (nth-search "|"
+									  stripped-rep
+									  5))
+						      :junk-allowed t)
+			  :end-stamp (parse-integer (subseq stripped-rep
+							    (1+ (nth-search
+								 "|"
+								 stripped-rep
+								 5)))
+						    :junk-allowed t)))
+	 (note (subseq stripped-rep (+ 3 (nth-search "+{+" stripped-rep 1))
+		       (nth-search "+}+" stripped-rep 1))))
+    (make-instance 'hqq-item-note-date
+		   :imported-elsewhence t
+		   :date-of relevant-dates
+		   :note-of note
+		   :category category
+		   :created-time created
+		   :modified-time modified
+		   :item-id id
+		   :item-name name)))
 
 ;; the type specifier solution with db-type is pretty awesome, but
 ;; there should be some means by which one could check whether the
