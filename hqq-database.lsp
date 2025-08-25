@@ -13,7 +13,9 @@
    :read-an-item
    :nth-search-helper
    :nth-search
-   :list-to-string))
+   :list-to-string
+   :*item-text-rep-start*
+   :*item-text-rep-end*))
 	   
 (in-package :hqq.database)
 
