@@ -1,7 +1,21 @@
 (in-package :cl-user)
-(defpackage hqq-database
-  (:use :cl))
-(in-package :hqq-database)
+(defpackage hqq.database
+  (:use :cl)
+  (:export
+   :hqq-item
+   :hqq-item-note-date
+   :hqq-todo
+   :hqq-database
+   :new-modify-time
+   :stamp-to-string-list
+   :item-text-rep
+   :hqq-date-range
+   :read-an-item
+   :nth-search-helper
+   :nth-search
+   :list-to-string))
+	   
+(in-package :hqq.database)
 
 (defclass hqq-item ()
   ((category :initarg :category
