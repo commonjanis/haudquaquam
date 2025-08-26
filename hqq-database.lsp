@@ -17,7 +17,8 @@
    :*item-text-rep-start*
    :*item-text-rep-end*
    :add-db-item))
-	   
+
+;; aw yeah.
 (in-package :hqq.database)
 
 (defclass hqq-item ()
