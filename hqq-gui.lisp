@@ -1,7 +1,9 @@
 ;; pretty much just a placeholder for now.
 
+(require 'clim)
+
 (in-package :cl-user)
 (defpackage #:hqq.gui
-  (:use #:cl))
+  (:use #:clim #:clim-lisp))
 
 (in-package #:hqq.gui)
