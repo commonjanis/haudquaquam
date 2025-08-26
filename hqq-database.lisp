@@ -1,5 +1,5 @@
 (in-package :cl-user)
-(defpackage hqq.database
+(defpackage hqq/database
   (:use :cl)
   (:export
    :hqq-item
@@ -16,10 +16,11 @@
    :list-to-string
    :*item-text-rep-start*
    :*item-text-rep-end*
-   :add-db-item))
+   :add-db-item)
+  (:nicknames :hqdb))
 
 ;; aw yeah.
-(in-package :hqq.database)
+(in-package :hqq/database)
 
 (defclass hqq-item ()
   ((category :initarg :category
