@@ -243,6 +243,9 @@
 (defun nth-search (substring string n)
   (nth-search-helper substring string n 0))
 
+;; TODO: optimize this bullshit with macros, perhaps just the simple
+;; kind with an &body form taking all the basic definitions and
+;; expanding thereupon.  i dunno; it's 20:48 and i'm too tired.
 (defmethod read-an-item ((rep string) (kind (eql 'hqq-item-note-date)))
   (let* ((stripped-rep (string-left-trim " $iN" (string-right-trim " $o" rep)))
 	 (id (parse-integer stripped-rep :junk-allowed t))
