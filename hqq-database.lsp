@@ -15,7 +15,8 @@
    :nth-search
    :list-to-string
    :*item-text-rep-start*
-   :*item-text-rep-end*))
+   :*item-text-rep-end*
+   :add-db-item))
 	   
 (in-package :hqq.database)
 
@@ -474,3 +475,20 @@
 ;; encapsulate the data associated with each item.  newlines should
 ;; separate everything as well, and furthermore, i think there should
 ;; be a reader function.  that's all!
+
+(defgeneric add-db-item (database item)
+  (:documentation "Add an item to a database - and a category if needed."))
+
+;; type checking is done within the function rather than the
+;; specifier.
+(defmethod add-db-item ((database hqq-database) item)
+  (with-slots ((content data-content) (cats categories)
+	       (the-type db-type)) ; note the specifier from the class.
+      database
+    (if (typep item the-type)
+	(prog2
+	    (vector-push-extend item content)
+	    item
+	  (unless (member (category item) cats)
+	    (push (category item) cats)))
+	nil)))
