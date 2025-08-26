@@ -468,4 +468,6 @@
 
 ;; TODO: string representation for databases and their contents in one
 ;; go.  this should have a similar overall structure but also
-;; encapsulate the data associated with each item.
+;; encapsulate the data associated with each item.  newlines should
+;; separate everything as well, and furthermore, i think there should
+;; be a reader function.  that's all!
