@@ -16,7 +16,8 @@
    :list-to-string
    :*item-text-rep-start*
    :*item-text-rep-end*
-   :add-db-item)
+   :add-db-item
+   :db-text-rep)
   (:nicknames :hqdb))
 
 ;; aw yeah.
@@ -294,6 +295,9 @@
 		   :item-id id
 		   :item-name name)))
 
+;; there's a lot of copypaste here.  it's probably best to find what
+;; the two methods share in common and make a macro to establish the
+;; common ground they share in the let* statement.
 (defmethod read-an-item ((rep string) (kind (eql 'hqq-todo)))
   (let* ((stripped-rep (string-left-trim " $iNTD" (string-right-trim " $o" rep)))
 	 (id (parse-integer stripped-rep :junk-allowed t))
@@ -347,6 +351,16 @@
 		   :item-name name
 		   :doneness done
 		   :priority prior)))
+
+;; TODO (albeit low on the range of priorities): implement a subclass
+;; of hqq-item-note-date which deals with expenses, similarly to the
+;; Expense database that comes with PalmOS.  it should allow for a
+;; choice of payment method, amount of payment as a fixed-point number
+;; (perhaps using an external library for the purpose), and a value
+;; characterizing the reason for the payment, which should improve
+;; upon the palm version by allowing users to choose from more than
+;; just a pre-existing list.  it should be fully compatible with
+;; existing methods.
 
 ;; the type specifier solution with db-type is pretty awesome, but
 ;; there should be some means by which one could check whether the
@@ -481,8 +495,7 @@
 (defgeneric add-db-item (database item)
   (:documentation "Add an item to a database - and a category if needed."))
 
-;; type checking is done within the function rather than the
-;; specifier.
+;; type checking is done within the method rather than the specifier.
 (defmethod add-db-item ((database hqq-database) item)
   (with-slots ((content data-content) (cats categories)
 	       (the-type db-type)) ; note the specifier from the class.
@@ -494,3 +507,42 @@
 	  (unless (member (category item) cats)
 	    (push (category item) cats)))
 	nil)))
+
+;; begins with the following: [rep start]DB|[data type]|[name]|+{+
+;; [categories]+}+[newline]
+;;
+;; then, it continues from there down data-contents, with each item
+;; separated by a newline and printed in full.  finally, on a new
+;; line, [rep end].
+(defgeneric db-text-rep (database)
+  (:documentation "Returns a flat string list representing an hqq-database."))
+
+;; might change up the existing *item-text-rep-start* variables to be
+;; more customizable in the context of the item-text-rep methods.
+(defvar *db-text-rep-start* "!$")
+(defvar *db-text-rep-end* "$!")
+
+(defmethod db-text-rep ((database hqq-database))
+  (with-slots ((content data-content)
+	       (cats categories)
+	       (name db-name)
+	       (datatype db-type))
+      database
+    `(,*db-text-rep-start*
+      "DB|"
+      ,(write-to-string datatype)
+      "|"
+      ,name
+      "|+{+"
+      ,@(mapcar (lambda (x)
+		  (concatenate 'string (write-to-string x) " "))
+		cats) ; space-separated, including the last one.
+      "+}+"
+      #\Newline
+      ,@(if (> (length content) 0)
+	    (loop for item across content
+		  collecting (list-to-string (append
+					      (item-text-rep item)
+					      '(#\Newline))))
+	    '(#\Newline))
+      ,*db-text-rep-end*)))
