@@ -1,2 +1,16 @@
 #+TITLE: Haudquaquam: Not At All Palmlike
 #+AUTHOR: Janis Vivian Media Lago
+
+* What is it?
+Haudquaquam (HQQ) is a personal information database, very vaguely inspired by the
+databases of PalmOS (which are much different and no doubt implemented more efficiently,
+consistently, and succinctly than what I have laid out here).  It revolves around an
+object-oriented, generic-programmed framework whereby databases are dedicated to objects
+of a certain class, and multiple databases may be encapsulated within a single file that
+also holds a user's entire session and settings (to be implemented more explicitly soon).
+It is written in Common Lisp because I feel like it.
+
+Haudquaquam will also eventually have an interactive, single-window graphical user
+interface, implemented using [[https://mcclim.common-lisp.dev/][McCLIM]], and this will hopefully run pretty much anywhere.
+However, if this proves to be too steep of a task, I may use a different GUI toolkit and
+protocol altogether.
