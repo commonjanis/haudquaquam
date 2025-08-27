@@ -511,9 +511,12 @@
 ;; begins with the following: [rep start]DB|[data type]|[name]|+{+
 ;; [categories]+}+[newline]
 ;;
-;; then, it continues from there down data-contents, with each item
+;; then, it continues from there down data-content, with each item
 ;; separated by a newline and printed in full.  finally, on a new
 ;; line, [rep end].
+;;
+;; also, note that two newlines together in the data-content section
+;; means an empty hqq-database.
 (defgeneric db-text-rep (database)
   (:documentation "Returns a flat string list representing an hqq-database."))
 
