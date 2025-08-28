@@ -3,9 +3,17 @@
 ;; loaded for testing with other parts of the suite.  nevertheless, it
 ;; still gets a package for convenience.
 
-(defpackage :hqq/test
-  (:use :hqq/database)
+(defpackage hqq/test
+  (:use
+   :cl
+   :hqq/database)
+  (:export
+   :*test-todo*
+   :*test-db*
+   :*test-empty-db*)
   (:nicknames :hqqt))
+
+(in-package :hqq/test)
 
 (defvar *test-todo*
   (make-instance 'hqdb:hqq-todo
