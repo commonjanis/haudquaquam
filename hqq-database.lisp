@@ -1,6 +1,6 @@
-(in-package :cl-user)
+ (in-package :cl-user)
 
-;; need to add accessor methods to this, as it were.  oops.
+;; sorry about all the accessors.
 (defpackage hqq/database
   (:use :cl)
   (:export
@@ -20,7 +20,25 @@
    :*item-text-rep-end*
    :add-db-item
    :db-text-rep
-   :data-content)
+   :data-content ; thus begin the accessors.
+   :category
+   :loaded-time
+   :created-time
+   :modified-time
+   :item-name
+   :item-total
+   :item-id
+   :imported-elsewhence
+   :begin-stamp
+   :end-stamp
+   :note-of
+   :date-of
+   :doneness
+   :priority
+   :db-name
+   :db-type
+   :categories ; oops
+   )
   (:nicknames :hqdb))
 
 ;; aw yeah.
