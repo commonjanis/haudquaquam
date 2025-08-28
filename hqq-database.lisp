@@ -409,6 +409,10 @@
 	    :type symbol
 	    :documentation "The specific type of hqq-item this database uses.")))
 
+;; this is what actually ensures there is some kind of valid
+;; data-contents list.
+
+
 ;; begins by ensuring the database's contents have the right kind of
 ;; array, then, if there are no categories defined and the database
 ;; has at least one item, tries to make a list of categories from the
@@ -418,14 +422,19 @@
   (with-slots ((cats categories) (content data-content)
 	       (type db-type))
       database
-    (unless (> (length content) 0)
-      (setf content (make-array 0 :adjustable t :element-type type
-				:fill-pointer 0)))
-    (unless (or cats (> (length content) 0))
-      (setf cats
-	    (remove-duplicates (loop for thing across content
-				     collecting (category thing)))))))
-
+    (unless (slot-boundp database 'data-content)
+      (setf content
+	    (make-array 0
+			:adjustable t
+			:element-type type
+			:fill-pointer 0)))
+    (unless cats
+      (if (> (length content) 0)
+	  (setf cats
+		(remove-duplicates (loop for thing across content
+					 collecting (category thing))))))
+    database))
+  
 ;; TODO: helpful little function, method, or macro to construct an
 ;; array of hqq-items for use in a database more easily.  probably
 ;; also works with type specifiers somehow.

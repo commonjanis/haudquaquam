@@ -29,7 +29,7 @@
 			       :element-type 'hqdb:hqq-todo
 			       :adjustable t)))
 
-;; making sure categories won't get baleeted.
+;; making sure categories won't get baleeted.  it could get tragic.
 (defvar *test-empty-db*
   (make-instance 'hqdb:hqq-database
 		 :db-name "Nothing important."
