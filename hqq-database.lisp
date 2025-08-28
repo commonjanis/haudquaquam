@@ -1,4 +1,4 @@
- (in-package :cl-user)
+(in-package :cl-user)
 
 ;; sorry about all the accessors.
 (defpackage hqq/database
@@ -20,6 +20,7 @@
    :*item-text-rep-end*
    :add-db-item
    :db-text-rep
+   :form-db-content
    :data-content ; thus begin the accessors.
    :category
    :loaded-time
@@ -37,8 +38,7 @@
    :priority
    :db-name
    :db-type
-   :categories ; oops
-   )
+   :categories) ; oops
   (:nicknames :hqdb))
 
 ;; aw yeah.
@@ -409,9 +409,25 @@
 	    :type symbol
 	    :documentation "The specific type of hqq-item this database uses.")))
 
-;; this is what actually ensures there is some kind of valid
-;; data-contents list.
+;; to form the array of databases for use with the :db-type initarg,
+;; use this method with a list of items, hopefully with the type
+;; specified by the database - this is tested for well-formedness
+;; within the method implementation.
+(defgeneric form-db-content (items item-type)
+  (:documentation "Form a list of items of some kind for an hqq-database."))
 
+;; there will eventually be specifiers for (item-type null) and other
+;; stuff.  so far so economical, however.
+(defmethod form-db-content ((items list) (item-type symbol))
+  (let* ((new-items (remove-if-not (lambda (x)
+				     (and x (typep x item-type)))
+				   items)) ; remove potential nil items
+	 (len (length new-items)))
+    (make-array len
+		:element-type item-type
+		:initial-contents new-items
+		:adjustable t
+		:fill-pointer len)))
 
 ;; begins by ensuring the database's contents have the right kind of
 ;; array, then, if there are no categories defined and the database
