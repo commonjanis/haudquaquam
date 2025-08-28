@@ -1,4 +1,6 @@
 (in-package :cl-user)
+
+;; need to add accessor methods to this, as it were.  oops.
 (defpackage hqq/database
   (:use :cl)
   (:export
