@@ -17,7 +17,8 @@
    :*item-text-rep-start*
    :*item-text-rep-end*
    :add-db-item
-   :db-text-rep)
+   :db-text-rep
+   :data-content)
   (:nicknames :hqdb))
 
 ;; aw yeah.
@@ -397,13 +398,17 @@
   (with-slots ((cats categories) (content data-content)
 	       (type db-type))
       database
-    (unless (slot-boundp database 'data-content)
+    (unless (> (length content) 0)
       (setf content (make-array 0 :adjustable t :element-type type
 				:fill-pointer 0)))
     (unless (or cats (> (length content) 0))
       (setf cats
 	    (remove-duplicates (loop for thing across content
 				     collecting (category thing)))))))
+
+;; TODO: helpful little function, method, or macro to construct an
+;; array of hqq-items for use in a database more easily.  probably
+;; also works with type specifiers somehow.
 
 (defgeneric add-category (database cat)
   (:documentation "Add a new category to a database if not already there."))
@@ -549,3 +554,8 @@
 					      '(#\Newline))))
 	    '(#\Newline))
       ,*db-text-rep-end*)))
+
+;; will rely on the database to consist of the type specified by the
+;; text representation.
+(defgeneric read-a-db (rep)
+  (:documentation "Read a database from a string representation."))
