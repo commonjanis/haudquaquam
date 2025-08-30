@@ -1,3 +1,5 @@
+;; so far, this actually works!  i'll be damned.
+
 (asdf:defsystem :hqq
   :description "haudquaquam: not quite a PalmOS-like database."
   :author "Janis Lago <janislago@gmail.com>"

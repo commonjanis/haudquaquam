@@ -20,6 +20,7 @@
    :*item-text-rep-end*
    :add-db-item
    :db-text-rep
+   :read-a-db
    :form-db-content
    :data-content ; thus begin the accessors.
    :category
@@ -609,5 +610,47 @@
 
 ;; will rely on the database to consist of the type specified by the
 ;; text representation.
+;;
+;; AS WITH THE OTHER TEXT REP METHODS, this will need a rewrite
+;; sometime, but i think i can make it work.
 (defgeneric read-a-db (rep)
   (:documentation "Read a database from a string representation."))
+
+(defmethod read-a-db ((rep string))
+  (let* ((stripped-rep (string-left-trim (uiop:strcat *db-text-rep-start*
+						      "DB")
+					 (string-right-trim
+					  *db-text-rep-end* rep)))
+	 (the-type (read-from-string (subseq stripped-rep 1
+					     (nth-search "|" stripped-rep 2))))
+	 (name (subseq stripped-rep
+		       (1+ (nth-search "|" stripped-rep 2))
+		       (nth-search "|" stripped-rep 3)))
+	 (cats (let ((briefly (subseq stripped-rep
+				      (+ (nth-search "+{+" stripped-rep 1) 3)
+				      (nth-search "+}+" stripped-rep 1))))
+		 (unless (string= briefly "")
+		   (mapcar #'read-from-string
+			   (reverse (cdr (reverse
+					  (uiop:split-string briefly))))))))
+	 (remain (string-right-trim *db-text-rep-end*
+				    (subseq stripped-rep
+					    (1+ (search (string #\Newline)
+						      stripped-rep)))))
+	 (items (if (or (string= remain
+				 (string #\Newline))
+			(string= remain ""))
+		    (make-array 0 :fill-pointer 0 :adjustable t
+				  :element-type the-type)
+		    (form-db-content
+		     (mapcar (lambda (x) (read-an-item x the-type))
+			     (reverse
+			      (cdr
+			       (reverse
+				(uiop:split-string remain :separator '(#\Newline))))))
+		     the-type))))
+    (make-instance 'hqq-database
+		   :data-content items
+		   :categories cats
+		   :db-name name
+		   :db-type the-type)))
