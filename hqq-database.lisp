@@ -271,6 +271,13 @@
 ;; TODO: optimize this bullshit with macros, perhaps just the simple
 ;; kind with an &body form taking all the basic definitions and
 ;; expanding thereupon.  i dunno; it's 20:48 and i'm too tired.
+;;
+;; TODO (of a higher priority): rewrite this shit, the item-text-rep
+;; methods, and the db-text-rep methods with new separators so that,
+;; on one hand, a single pipe character can occur in one of the string
+;; fields (eg. in note-of) without messing up the reading.  it's
+;; either that or prohibiting pipe characters from being input by the
+;; user in the GUI, which i think would be more annoying.
 (defmethod read-an-item ((rep string) (kind (eql 'hqq-item-note-date)))
   (let* ((stripped-rep (string-left-trim " $iN" (string-right-trim " $o" rep)))
 	 (id (parse-integer stripped-rep :junk-allowed t))
