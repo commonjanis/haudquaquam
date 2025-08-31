@@ -18,10 +18,13 @@
    :list-to-string
    :*item-text-rep-start*
    :*item-text-rep-end*
+   :*db-text-rep-start*
+   :*db-text-rep-end*
    :add-db-item
    :db-text-rep
    :read-a-db
    :form-db-content
+   :add-category
    :data-content ; thus begin the accessors.
    :category
    :loaded-time
