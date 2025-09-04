@@ -128,6 +128,13 @@
 (defvar *item-text-rep-start* "$$i")
 (defvar *item-text-rep-end* "$$o")
 
+;; TODO: fix this and the read-a-db method so that they can handle a
+;; note within an hqq-item-note-date representation which contains a
+;; newline or multiple newlines.  there is a problem with the current
+;; implementation and its newline scanning which i really ought to fix
+;; by changing the format of both db-text-rep and read-a-db to use
+;; double newlines to separate items or something else other than a
+;; single newline.
 (defgeneric item-text-rep (item)
   (:documentation "Group of methods for making strings from hqq-item objects."))
 
